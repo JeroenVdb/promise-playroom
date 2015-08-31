@@ -4,31 +4,43 @@ var Promise = require('promise');
 
 console.log('Welcome to my promise test');
 
-var promise = new Promise(setFirstPartyUrls);
-
-promise
-	.then(analyzeAllEntries, throwError)
-	.then(sendMessage, throwError);
-
-function setFirstPartyUrls(resolve, reject) {
-	console.log('Find all first party urls: set documentroot as one + those from the textbox');
-	resolve();
-	// reject();
+var person = {
+	name: 'Van den Berghe',
+	firstName: 'Jeroen'
 }
 
-var analyzeAllEntries = new Promise(function(resolve, reject) {
-	console.log('lets analyze all entries');
-	var test = setTimeout(function() {
-		console.log('entries analyzed');
-		resolve();
+
+function setFirstPartyUrls(person) {
+	return new Promise(function(resolve, reject) {
+		console.log('setFirstPartyUrls: ' + person.firstName + '... ' + person.name);
+		resolve(person);
 		// reject();
-	}, 3000);
-});
+	});
+}
+
+function analyzeAllEntries(person) {
+	return new Promise(function(resolve, reject) {
+		console.log('analyzeAllEntries: ' + person.firstName + '... ' + person.name);
+		var test = setTimeout(function() {
+			console.log('entries analyzed');
+			resolve(person);
+			// reject();
+		}, 3000);
+	});
+}
 
 function throwError() {
-	console.log('show errorpage');
+	return new Promise(function(resolve, reject) {
+		console.log('show errorpage');
+	});
 }
 
-function sendMessage() {
-	console.log('some message');
+function sendMessage(person) {
+	return new Promise(function(resolve, reject) {
+		console.log('sendMessage: ' + person.firstName + '... ' + person.name);
+	});
 }
+
+setFirstPartyUrls(person)
+	.then(analyzeAllEntries, throwError)
+	.then(sendMessage, throwError);
