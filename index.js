@@ -42,12 +42,13 @@ function sendMessage(person) {
 }
 
 function sendMessageAfterSomeRandomTime(it) {
+
 	return new Promise(function(resolve, reject) {
 		var randomTime = Math.floor(Math.random() * (10000 - 1) + 1);
 		var messageTimeout = setTimeout(function() {
 			console.log('Iteration: ' + it);
 			console.log('Took some time: ' + randomTime);
-			resolve(it);
+			resolve(randomTime);
 			// reject();
 		}, randomTime);
 	});
@@ -59,16 +60,51 @@ setFirstPartyUrls(person)
 	.then(sendMessage, throwError);
 
 // Looping order is unknown
-var i = 0;
-for (i = 0; i < 100; i++) {
+function asyncLoop(iterations, func, callback) {
+    var index = 0;
+    var done = false;
+    var loop = {
+        next: function() {
+            if (done) {
+                return;
+            }
 
-	console.log('Iteration: ' + i);
+            if (index < iterations) {
+                index++;
+                func(loop);
 
-	sendMessageAfterSomeRandomTime(i)
-		.then(function(it) {
+            } else {
+                done = true;
+                callback();
+            }
+        },
+
+        iteration: function() {
+            return index - 1;
+        },
+
+        break: function() {
+            done = true;
+            callback();
+        }
+    };
+    loop.next();
+    return loop;
+}
+
+asyncLoop(100, function(loop) {
+
+	console.log('Iteration: ' + loop.iteration());
+
+	sendMessageAfterSomeRandomTime(loop.iteration())
+		.then(function(time) {
 			// console.log('This message timed out: ' + time);
-			console.log('Iteration: ' + it);
+			console.log('Time for this: ' + time);
+			loop.next();
 		}, function() {
 			console.log('Failed');
 		});
-}
+
+}, function() {
+	console.log('Loop is done, go show the results');
+});
