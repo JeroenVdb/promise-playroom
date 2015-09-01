@@ -41,6 +41,34 @@ function sendMessage(person) {
 	});
 }
 
+function sendMessageAfterSomeRandomTime(it) {
+	return new Promise(function(resolve, reject) {
+		var randomTime = Math.floor(Math.random() * (10000 - 1) + 1);
+		var messageTimeout = setTimeout(function() {
+			console.log('Iteration: ' + it);
+			console.log('Took some time: ' + randomTime);
+			resolve(it);
+			// reject();
+		}, randomTime);
+	});
+}
+
+// Chaining
 setFirstPartyUrls(person)
 	.then(analyzeAllEntries, throwError)
 	.then(sendMessage, throwError);
+
+// Looping order is unknown
+var i = 0;
+for (i = 0; i < 100; i++) {
+
+	console.log('Iteration: ' + i);
+
+	sendMessageAfterSomeRandomTime(i)
+		.then(function(it) {
+			// console.log('This message timed out: ' + time);
+			console.log('Iteration: ' + it);
+		}, function() {
+			console.log('Failed');
+		});
+}
